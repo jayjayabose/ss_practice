@@ -11,7 +11,6 @@ function ProgressBar() {
 
     const intervalId = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
-      console.log('interval', startTime, elapsedTime);
 
       if (elapsedTime >= TIME_TO_COMPLETE) {
         setBarProgressWidth(BAR_MAX_WIDTH);
