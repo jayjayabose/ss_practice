@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import {bar} from '../types/common';
 
 /*
-Note: onBarCompleted is invoked twice. why?
+
 */
 
-const TIME_TO_COMPLETE = 5000;
+const TIME_TO_COMPLETE = 3500;
+const UPDATE_INTERVAL = 20;
 const BAR_MAX_WIDTH = 200;
 
 type ProgressBarProps = {
@@ -17,27 +18,30 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
   const [barProgressWidth, setBarProgressWidth] = useState(0);
 
   useEffect(() => {
-    if (attributes.status !== 'running') {
+    if (attributes.status === 'ready' || attributes.status === 'completed') {
       return;
     }
+    console.log('ProgressBar useEffect going to start', attributes)
+
     const startTime = Date.now();
-    let completed = false;
     
     const intervalId = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
 
-      if (elapsedTime >= TIME_TO_COMPLETE && completed === false) {
-        // console.log('ProgressBar debug a', 'completed', completed)
-        completed = true;
+      if (elapsedTime >= TIME_TO_COMPLETE) {
+        console.log(`interval: invoke onBarCompleted(${attributes.id})`)
         setBarProgressWidth(BAR_MAX_WIDTH);
         onBarCompleted(attributes.id);
         clearInterval(intervalId);
-        // console.log('ProgressBar debug b', 'completed', completed)
         return;
       }
       setBarProgressWidth((elapsedTime / TIME_TO_COMPLETE) * BAR_MAX_WIDTH);
-    }, 200);
-  }, [attributes.status]);
+
+      return () => {
+        clearInterval(intervalId);
+      }
+    }, UPDATE_INTERVAL);
+  }, [attributes, onBarCompleted]);
 
   return (
     <>
@@ -56,11 +60,11 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
           }}
         ></div>
       </div>
-      <div>
+      {/* <div>
         status: {attributes.status}
         <br />
         id: {attributes.id}
-      </div>
+      </div> */}
     </>
   );
 }
