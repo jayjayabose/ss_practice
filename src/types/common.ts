@@ -1,7 +1,9 @@
+type Status = 'ready' | 'running' | 'completed';
 
-type bar = {
+type Bar = {
   id: number,
-  status: 'ready' | 'running' | 'completed'
+  status: Status
 };
 
-export type {bar}
+
+export type { Bar, Status }

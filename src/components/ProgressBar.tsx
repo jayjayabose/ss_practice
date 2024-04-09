@@ -1,30 +1,23 @@
 import { useState, useEffect } from 'react';
-import {bar} from '../types/common';
-
-/*
-
-
-
-*/
+import {Status} from '../types/common';
 
 const TIME_TO_COMPLETE = 3500;
 const UPDATE_INTERVAL = 50;
 const BAR_MAX_WIDTH = 200;
 
 type ProgressBarProps = {
-  attributes: bar,
-  onBarCompleted: (barId: number) => void,
+  id: number,
+  status: Status,
+  onBarCompleted: (id: number) => void,
 };
 
-function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
+function ProgressBar({ id, status, onBarCompleted }: ProgressBarProps) {
   const [barProgressWidth, setBarProgressWidth] = useState(0);
-  console.log('Progress bar barProgressWidth', attributes.id, barProgressWidth)
 
   useEffect(() => {
-    if (attributes.status === 'ready' || attributes.status === 'completed') {
+    if (status === 'ready' || status === 'completed') {
       return;
     }
-    console.log('ProgressBar useEffect going to start', attributes)
 
     const startTime = Date.now();
     
@@ -32,9 +25,8 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
       const elapsedTime = Date.now() - startTime;
 
       if (elapsedTime >= TIME_TO_COMPLETE) {
-        console.log(`interval: invoke onBarCompleted(${attributes.id})`)
         setBarProgressWidth(BAR_MAX_WIDTH);
-        onBarCompleted(attributes.id);
+        onBarCompleted(id);
         clearInterval(intervalId);
         return;
       }
@@ -44,7 +36,7 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
         clearInterval(intervalId);
       }
     }, UPDATE_INTERVAL);
-  }, [attributes, onBarCompleted]);
+  }, [id, status, onBarCompleted]);
 
   return (
     <>
