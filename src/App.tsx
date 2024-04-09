@@ -1,26 +1,13 @@
 // https://3.basecamp.com/3695031/buckets/33084981/documents/6619703339
 import './App.css';
 import ProgressBar from './components/ProgressBar';
-import { useEffect, useState } from 'react';
-import { bar } from './types/common';
-
-/*
-
-REQS
-
-Add a button next to each progress bar 
-on click remove the progress bar from the DOM 
- - maintian 5 concurrent rule
-
-IMP
-
-
-*/
+import { useEffect, useState, useCallback } from 'react';
+import { Bar } from './types/common';
 
 function App() {
   console.log('App: render');
-  const [bars, setBars] = useState<bar[]>([]);
-  const MAX_CONCURRENT_BARS = 1;
+  const [bars, setBars] = useState<Bar[]>([]);
+  const MAX_CONCURRENT_BARS = 3;
 
   const handleAddBar = () => {
     const newBar = {
@@ -30,49 +17,57 @@ function App() {
     setBars((prev) => prev.concat(newBar));
   };
 
-  const handleBarCompleted = (barId: number) => {
-    setBars(prev => {
-      return prev.map(bar => {
-        if (bar.id === barId) {
-          console.log('handleBarCompleted ', {...bar, status: 'completed'}, Date.now());
-          return {...bar, status: 'completed'};
+  const handleBarCompleted = useCallback((id: number) => {
+    setBars((prev) => {
+      return prev.map((bar) => {
+        if (bar.id === id) {
+          console.log(
+            'handleBarCompleted ',
+            { ...bar, status: 'completed' },
+            Date.now()
+          );
+          return { ...bar, status: 'completed' };
         }
         return bar;
       });
-    })
+    });
+  },[]);
+
+  const runningBarsCount = bars.filter(
+    (bar) => bar.status === 'running'
+  ).length;
+  const maxBarsRunning = runningBarsCount >= MAX_CONCURRENT_BARS;
+  const noBarsAreReady = !bars.some((bar) => bar.status === 'ready');
+
+  const tryStartMaxBars = () => {
+    console.log(
+      'App tryStartMaxBars:',
+      'maxBarsRunning',
+      maxBarsRunning,
+      'noBarsAreReady',
+      noBarsAreReady
+    );
+
+    if (maxBarsRunning || noBarsAreReady) {
+      return;
+    }
+
+    console.log('App tryStartMaxBars:', 'start some bars, yo');
+
+    const barsToStartCount = MAX_CONCURRENT_BARS - runningBarsCount;
+    setBars((prev) => {
+      let barsStartedCount = 0;
+      return prev.map((bar) => {
+        if (barsStartedCount < barsToStartCount && bar.status === 'ready') {
+          barsStartedCount += 1;
+          return { ...bar, status: 'running' };
+        }
+        return bar;
+      });
+    });
   };
 
-
-
-  useEffect(() => {
-    const tryStartMaxBars = () => {
-      const runningBarsCount = bars.filter(bar => bar.status === 'running').length;
-      const maxBarsRunning = runningBarsCount >= MAX_CONCURRENT_BARS;
-      const noBarsAreReady = !bars.some((bar) => bar.status === 'ready');
-  
-      console.log('App tryStartMaxBars:', 'maxBarsRunning', maxBarsRunning, 'noBarsAreReady', noBarsAreReady)
-  
-      if (maxBarsRunning || noBarsAreReady) {
-        return;
-      }
-  
-      console.log('App tryStartMaxBars:', 'start some bars, yo');
-  
-      const barsToStartCount = MAX_CONCURRENT_BARS - runningBarsCount;
-      setBars(prev => {
-        let barsStartedCount = 0;
-        return prev.map(bar => {
-          if (barsStartedCount < barsToStartCount && bar.status === 'ready') {
-            barsStartedCount +=1;
-            return {...bar, status: 'running'}
-          }
-          return bar;
-        });
-      });
-    };    
-    console.log('App: useEffect(, [bars])');
-    tryStartMaxBars();
-  }, [bars]);
+  useEffect(tryStartMaxBars, [runningBarsCount, maxBarsRunning, noBarsAreReady]);
 
   return (
     <>
@@ -80,7 +75,9 @@ function App() {
         return (
           <ProgressBar
             key={bar.id}
-            attributes={bar}
+            // attributes={bar}
+            id={bar.id}
+            status={bar.status}
             onBarCompleted={handleBarCompleted}
           />
         );
