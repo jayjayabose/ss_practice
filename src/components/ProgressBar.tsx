@@ -3,10 +3,12 @@ import {bar} from '../types/common';
 
 /*
 
+
+
 */
 
 const TIME_TO_COMPLETE = 3500;
-const UPDATE_INTERVAL = 20;
+const UPDATE_INTERVAL = 50;
 const BAR_MAX_WIDTH = 200;
 
 type ProgressBarProps = {
@@ -16,6 +18,7 @@ type ProgressBarProps = {
 
 function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
   const [barProgressWidth, setBarProgressWidth] = useState(0);
+  console.log('Progress bar barProgressWidth', attributes.id, barProgressWidth)
 
   useEffect(() => {
     if (attributes.status === 'ready' || attributes.status === 'completed') {
@@ -45,6 +48,7 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
 
   return (
     <>
+      <div style={{display: 'flex', justifyContent: 'center'}}>
       <div
         style={{
           width: `${BAR_MAX_WIDTH}px`,
@@ -59,6 +63,8 @@ function ProgressBar({ attributes, onBarCompleted }: ProgressBarProps) {
             height: '20px',
           }}
         ></div>
+      </div>
+      <button>X</button>
       </div>
       {/* <div>
         status: {attributes.status}

@@ -6,13 +6,21 @@ import { bar } from './types/common';
 
 /*
 
+REQS
+
+Add a button next to each progress bar 
+on click remove the progress bar from the DOM 
+ - maintian 5 concurrent rule
+
+IMP
+
 
 */
 
 function App() {
   console.log('App: render');
   const [bars, setBars] = useState<bar[]>([]);
-  const MAX_CONCURRENT_BARS = 5;
+  const MAX_CONCURRENT_BARS = 1;
 
   const handleAddBar = () => {
     const newBar = {
