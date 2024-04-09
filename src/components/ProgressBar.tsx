@@ -40,7 +40,7 @@ function ProgressBar({ id, status, onBarCompleted }: ProgressBarProps) {
 
   return (
     <>
-      <div style={{display: 'flex', justifyContent: 'center'}}>
+      <div style={{display: 'flex', alignItems: 'center'}}>
       <div
         style={{
           width: `${BAR_MAX_WIDTH}px`,
